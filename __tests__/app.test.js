@@ -12,7 +12,7 @@ afterAll(() => db.end())
 describe('GET api/topics', () => {
     test('should return a status code of 200 with an array of objects ', () => {
         return request(app)
-        .get('/api/topics/')
+        .get('/api/topics')
         .expect(200)
         .then(({body}) => {
             expect(body.topics).toHaveLength(3)
@@ -22,4 +22,16 @@ describe('GET api/topics', () => {
                 });
     });
     })
+
+    test('should return error code 404 Not Found when provided non-existent route ', () => {
+        return request(app)
+        .get('/api/topicxs')
+        .expect(404)
+        .then(({body}) => {
+            expect(body).toHaveProperty('msg')
+        expect(body.msg).toBe('Not Found')
+        })
+        
+    });
+    
 })
