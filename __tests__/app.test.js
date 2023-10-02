@@ -21,17 +21,17 @@ describe('GET api/topics', () => {
                 expect(typeof(topics.description)).toBe('string')
                 });
     });
-    })
+    }) 
+})
 
+describe('GET api/invalidpath', () => {
     test('should return error code 404 Not Found when provided non-existent route ', () => {
         return request(app)
-        .get('/api/topicxs')
+        .get('/api/invalidpath')
         .expect(404)
         .then(({body}) => {
             expect(body).toHaveProperty('msg')
-        expect(body.msg).toBe('Not Found')
-        })
-        
+        expect(body.msg).toBe('Invalid Path')
     });
-    
-})
+});
+}) 
