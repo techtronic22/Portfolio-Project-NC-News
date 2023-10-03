@@ -37,3 +37,27 @@ exports.selectArticleById = (articleId) => {
 		return result.rows[0];
 	});
 };
+
+
+exports.selectCommentsById = (articleId) => {
+	if (!Number(articleId)) {
+        return Promise.reject({ status: 400, msg: 'Bad Request' });
+    }
+
+    const query = `
+        SELECT 
+            comment_id,
+            votes,
+            created_at,
+            author,
+            body,
+            article_id
+        FROM comments
+        WHERE article_id = $1
+        ORDER BY created_at DESC`;
+
+    return db.query(query, [articleId]).then((result) => {
+        return result.rows;
+    });
+};
+
