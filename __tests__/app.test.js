@@ -54,6 +54,7 @@ describe("GET /api/articles/:article_id", () => {
 			.then(({ body }) => {
 				expect(typeof body.article).toBe("object");
 				expect(body.article).toHaveProperty("article_id");
+                expect(body.article.article_id).toBe(1);
 				expect(body.article).toHaveProperty("title");
 				expect(body.article).toHaveProperty("author");
 				expect(body.article).toHaveProperty("body");
@@ -73,4 +74,14 @@ describe("GET /api/articles/:article_id", () => {
 				expect(body.msg).toBe("Article not found");
 			});
 	});
+
+    test("should return error code 400 Bad Request for an invalid article_id", () => {
+        return request(app)
+          .get("/api/articles/invalid_id")
+          .expect(400)
+          .then(({ body }) => {
+            expect(body).toHaveProperty("msg");
+            expect(body.msg).toBe("Bad Request");
+          });
+      });
 });
