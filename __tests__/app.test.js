@@ -45,3 +45,43 @@ describe("GET /api", () => {
 			});
 	});
 });
+
+describe("GET /api/articles/:article_id", () => {
+	test("should return a status code of 200 with the requested article", () => {
+		return request(app)
+			.get("/api/articles/1")
+			.expect(200)
+			.then(({ body }) => {
+				expect(typeof body.article).toBe("object");
+				expect(body.article).toHaveProperty("article_id");
+                expect(body.article.article_id).toBe(1);
+				expect(body.article).toHaveProperty("title");
+				expect(body.article).toHaveProperty("author");
+				expect(body.article).toHaveProperty("body");
+				expect(body.article).toHaveProperty("topic");
+				expect(body.article).toHaveProperty("created_at");
+				expect(body.article).toHaveProperty("votes");
+				expect(body.article).toHaveProperty("article_img_url");
+			});
+	});
+
+	test("should return error code 404 Not Found for a non-existent article_id", () => {
+		return request(app)
+			.get("/api/articles/9999")
+			.expect(404)
+			.then(({ body }) => {
+				expect(body).toHaveProperty("msg");
+				expect(body.msg).toBe("Article not found");
+			});
+	});
+
+    test("should return error code 400 Bad Request for an invalid article_id", () => {
+        return request(app)
+          .get("/api/articles/invalid_id")
+          .expect(400)
+          .then(({ body }) => {
+            expect(body).toHaveProperty("msg");
+            expect(body.msg).toBe("Bad Request");
+          });
+      });
+});
