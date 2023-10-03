@@ -12,16 +12,18 @@ app.get("/api/articles/:article_id", getArticleById);
 
 // Error Handling
 app.use((err, req, res, next) => {
-	console.log(err);
-	if (err.status) {
-		res.status(err.status).send({ msg: err.msg });
-	} else {
-		res.status(500).send({ msg: "Internal Server Error" }); // Default error response
-	}
+    if (err.status === 400) {
+        res.status(400).send({ msg: "Bad Request" });
+    } else if (err.status) {
+      res.status(err.status).send({ msg: err.msg });
+    } else {
+      res.status(500).send({ msg: "Internal Server Error" });
+    }
 });
 
 app.all("*", (req, res) => {
-	res.status(404).send({ msg: "Invalid Path" });
+    res.status(404).send({ msg: "Invalid Path" });
 });
+
 
 module.exports = app;

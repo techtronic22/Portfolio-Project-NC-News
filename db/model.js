@@ -12,6 +12,10 @@ exports.selectAllTopics = () => {
 };
 
 exports.selectArticleById = (articleId) => {
+	if (!Number(articleId)) {
+		return Promise.reject({status: 400, msg:'Bad Request'} )
+	}
+
 	const query = `
 	  SELECT 
 		author, 
