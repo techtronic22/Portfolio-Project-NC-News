@@ -37,3 +37,15 @@ exports.selectArticleById = (articleId) => {
 		return result.rows[0];
 	});
 };
+
+exports.selectAllArticles = (sort_by = "created_at", order = "desc") => {
+
+	let query = `SELECT * FROM articles ORDER BY ${sort_by} ${order}`;
+
+	return db.query(query).then((articles) => {
+		if (!articles.rows.length) {
+			return Promise.reject({ status: 404, msg: "Not Found" });
+		}
+		return articles.rows;
+	});
+};
