@@ -86,13 +86,15 @@ describe("GET /api/articles/:article_id", () => {
 	});
 });
 
-describe.skip("GET api/articles", () => {
+describe("GET api/articles", () => {
 	test("should return a status code of 200 with an array of objects ", () => {
 		return request(app)
 			.get("/api/articles/")
 			.expect(200)
 			.then(({ body }) => {
+                expect(Array.isArray(body.articles)).toBe(true)
 				expect(body.articles).toHaveLength(13);
+                expect(body.articles).toBeSorted({descending: true, key: 'created_at'})
 				body.articles.forEach((article) => {
 					expect(article).toHaveProperty("author");
 					expect(article).toHaveProperty("title");
