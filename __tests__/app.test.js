@@ -92,9 +92,12 @@ describe("GET api/articles", () => {
 			.get("/api/articles/")
 			.expect(200)
 			.then(({ body }) => {
-                expect(Array.isArray(body.articles)).toBe(true)
+				expect(Array.isArray(body.articles)).toBe(true);
 				expect(body.articles).toHaveLength(13);
-                expect(body.articles).toBeSorted({descending: true, key: 'created_at'})
+				expect(body.articles).toBeSorted({
+					descending: true,
+					key: "created_at",
+				});
 				body.articles.forEach((article) => {
 					expect(article).toHaveProperty("author");
 					expect(article).toHaveProperty("title");

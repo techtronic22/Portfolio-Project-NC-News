@@ -54,7 +54,6 @@ exports.selectAllArticles = (sort_by = "created_at", order = "desc") => {
 	ORDER BY articles.created_at DESC;`;
 
 	return db.query(query).then((articles) => {
-		console.log(articles)
 		if (!articles.rows.length) {
 			return Promise.reject({ status: 404, msg: "Not Found" });
 		}
