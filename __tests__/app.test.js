@@ -30,7 +30,7 @@ describe("GET api/invalidpath", () => {
 			.expect(404)
 			.then(({ body }) => {
 				expect(body).toHaveProperty("msg");
-				expect(body.msg).toBe("Invalid Path");
+				expect(body.msg).toBe("Not found");
 			});
 	});
 });
@@ -86,13 +86,15 @@ describe("GET /api/articles/:article_id", () => {
 	});
 });
 
-describe.skip("GET /api/articles/:article_id/comments", () => {
-	test("should return a status code of 200 with an array of comments for the given article_id", async () => {
+describe("GET /api/articles/:article_id/comments", () => {
+	test("should return a status code of 200 with an array of comments for the given article_id, ordered by latest", () => {
 		return request(app)
 			.get("/api/articles/1/comments")
 			.expect(200)
 			.then(({ body }) => {
+				expect(body.comments).toHaveLength(11);
 				expect(Array.isArray(body.comments)).toBe(true);
+				expect(body.comments).toBeSorted({ descending: true, key: 'created_at' });
 				body.comments.forEach((comment) => {
 					expect(comment).toHaveProperty("comment_id");
 					expect(comment).toHaveProperty("votes");
@@ -102,14 +104,34 @@ describe.skip("GET /api/articles/:article_id/comments", () => {
 					expect(comment).toHaveProperty("article_id", 1);
 				});
 			});
+	})
+
+	test('should return a status code of 404 Not Found for an article_id that does not exist', () => {
+		return request(app)
+		.get("/api/articles/99/comments")
+		.expect(404)
+		.then(({ body }) => {
+			expect(body.msg).toBe('Not Found')
+		}) 		
 	});
 
-	test("should return comments sorted with the most recent comments first", async () => {
+	test('should return a status code of 200 with an empty array for an article_id that exists but doesn"t have a comment', () => {
 		return request(app)
-			.get("/api/articles/1/comments")
-			.expect(200)
-            .then(({body}) => {
-                expect(Array.isArray(body.comments)).toBe(true);
-            })
+		.get("/api/articles/10/comments")
+		.expect(200)
+		.then(({ body }) => {
+			expect(body.comments).toEqual([])
+		}) 		
 	});
-});
+
+	test('should return a status code of 400 Bad Request for an invalid article_id', () => {
+		return request(app)
+		.get("/api/articles/noarticle/comments")
+		.expect(400)
+		.then(({ body }) => {
+			expect(body.msg).toBe('Bad Request')
+		}) 		
+	});
+
+})
+
