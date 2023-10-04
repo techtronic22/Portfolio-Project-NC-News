@@ -113,3 +113,128 @@ describe("GET api/articles", () => {
 	});
 });
 
+describe("GET /api/articles/:article_id/comments", () => {
+	test("should return a status code of 200 with an array of comments for the given article_id, ordered by latest", () => {
+		return request(app)
+			.get("/api/articles/1/comments")
+			.expect(200)
+			.then(({ body }) => {
+				expect(body.comments).toHaveLength(11);
+				expect(Array.isArray(body.comments)).toBe(true);
+				expect(body.comments).toBeSorted({ descending: true, key: 'created_at' });
+				body.comments.forEach((comment) => {
+					expect(comment).toHaveProperty("comment_id");
+					expect(comment).toHaveProperty("votes");
+					expect(comment).toHaveProperty("created_at");
+					expect(comment).toHaveProperty("author");
+					expect(comment).toHaveProperty("body");
+					expect(comment).toHaveProperty("article_id", 1);
+				});
+			});
+	})
+
+	test('should return a status code of 404 Not Found for an article_id that does not exist', () => {
+		return request(app)
+		.get("/api/articles/99/comments")
+		.expect(404)
+		.then(({ body }) => {
+			expect(body.msg).toBe('Not Found')
+		}) 		
+	});
+
+	test('should return a status code of 200 with an empty array for an article_id that exists but doesn"t have a comment', () => {
+		return request(app)
+		.get("/api/articles/10/comments")
+		.expect(200)
+		.then(({ body }) => {
+			expect(body.comments).toEqual([])
+		}) 		
+	});
+
+	test('should return a status code of 400 Bad Request for an invalid article_id', () => {
+		return request(app)
+		.get("/api/articles/noarticle/comments")
+		.expect(400)
+		.then(({ body }) => {
+			expect(body.msg).toBe('Bad Request')
+		}) 		
+	});
+
+})
+
+describe('POST /api/articles/:article_id/comments', () => {
+	test('should return a status code of 201 and a new comment posted to the database', () => {
+		const newComment = {
+			username: 'icellusedkars',
+			body: 'Great article on how to build endpoints!'
+		}		
+		
+		return request(app)
+		.post('/api/articles/6/comments')
+		.send(newComment)
+		.expect(201)
+		.then(({ body }) => {
+			expect(body.comment).toBe('Great article on how to build endpoints!')
+		})
+	});
+	
+	test('should return a status code of 400 when user leaves a blank comment', () => {
+		const newComment = {
+			username: 'icellusedkars',
+			body: ''
+		}		
+		
+		return request(app)
+		.post('/api/articles/6/comments')
+		.send(newComment)
+		.expect(400)
+		.then(({ body }) => {
+			expect(body.msg).toBe('Bad Request')
+		})
+	});
+	
+	test('should return a status code of 400 for an invalid article_id', () => {
+		const newComment = {
+			username: 'icellusedkars',
+			body: 'Very useful article !'
+		}		
+		
+		return request(app)
+		.post('/api/articles/rubbish/comments')
+		.send(newComment)
+		.expect(400)
+		.then(({ body }) => {
+			expect(body.msg).toBe('Bad Request')
+		})
+	});
+
+	test('should return a status code of 404 for an article_id which doesn"t exist', () => {
+		const newComment = {
+			username: 'icellusedkars',
+			body: 'Very useful article !'
+		}		
+		
+		return request(app)
+		.post('/api/articles/99/comments')
+		.send(newComment)
+		.expect(404)
+		.then(({ body }) => {
+			expect(body.msg).toBe('Not Found')
+		})
+	});
+
+	test('should return a status code of 404 for a username which doesn"t exist', () => {
+		const newComment = {
+			username: 'idonotexist',
+			body: 'Boring article :('
+		}		
+		
+		return request(app)
+		.post('/api/articles/6/comments')
+		.send(newComment)
+		.expect(404)
+		.then(({ body }) => {
+			expect(body.msg).toBe('Username Not Found')
+		})
+	});
+});

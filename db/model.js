@@ -61,3 +61,54 @@ exports.selectAllArticles = (sort_by = "created_at", order = "desc") => {
 	});
 };
 
+exports.selectCommentsById = (articleId) => {
+	if (!Number(articleId)) {
+		return Promise.reject({ status: 400, msg: "Bad Request" });
+	}
+
+	return db
+		.query(`SELECT * FROM articles WHERE article_id = $1`, [articleId])
+		.then((result) => {
+			if (result.rows.length === 0) {
+				return Promise.reject({ status: 404, msg: "Not Found" });
+			}
+
+			return db.query(
+				`SELECT * FROM COMMENTS WHERE article_id = $1 ORDER BY created_at DESC`,
+				[articleId]
+			);
+		})
+		.then((comments) => {
+			return comments.rows;
+		});
+};
+
+
+exports.insertComment = (newComment, article_id) => {
+	if (!Number(article_id)) {
+		return Promise.reject({ status: 400, msg: "Bad Request" });
+	}
+	
+    const { username, body } = newComment;
+
+    return db
+        .query(`SELECT * FROM articles WHERE article_id = $1`, [article_id])
+        .then((articles) => {
+            if (articles.rows.length === 0) {
+                return Promise.reject({ status: 404, msg: "Not Found" });
+            }
+
+            if (body === "") {
+                return Promise.reject({ status: 400, msg: "Bad Request" });
+            }
+
+            return db.query(
+                `INSERT INTO comments (body, article_id, author) 
+                VALUES ($1, $2, $3) 
+                RETURNING *;`, [body, article_id, username]
+            );
+        })
+        .then((data) => {
+            return data.rows[0]
+        });
+};
