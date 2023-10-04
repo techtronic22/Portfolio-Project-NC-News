@@ -30,7 +30,7 @@ describe("GET api/invalidpath", () => {
 			.expect(404)
 			.then(({ body }) => {
 				expect(body).toHaveProperty("msg");
-				expect(body.msg).toBe("Invalid Path");
+				expect(body.msg).toBe("Not found");
 			});
 	});
 });
@@ -112,3 +112,4 @@ describe("GET api/articles", () => {
 			});
 	});
 });
+

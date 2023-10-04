@@ -60,3 +60,4 @@ exports.selectAllArticles = (sort_by = "created_at", order = "desc") => {
 		return articles.rows;
 	});
 };
+

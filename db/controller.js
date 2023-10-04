@@ -1,8 +1,4 @@
-const {
-	selectAllTopics,
-	selectArticleById,
-	selectAllArticles,
-} = require("./model");
+const { selectAllTopics, selectAllArticles, selectArticleById } = require("./model");
 const fs = require("fs/promises");
 
 exports.getAllTopics = (req, res, next) => {
@@ -28,7 +24,6 @@ exports.getAllArticles = (req, res, next) => {
 			res.status(200).send({ articles });
 		})
 		.catch((err) => {
-			console.log(err);
 			next(err);
 		});
 };
@@ -44,3 +39,4 @@ exports.getArticleById = (req, res, next) => {
 			next(err);
 		});
 };
+
