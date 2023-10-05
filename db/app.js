@@ -4,22 +4,25 @@ const {
 	getAllEndpoints,
   getAllArticles,
 	getArticleById,
-  getCommentsById
+  getCommentsById,
+  postComments
 } = require("./controller");
+const { handlePsqlErrors, handleErrors } = require("./error-handler");
+
 const app = express();
+app.use(express.json());
 
 app.get("/api/topics", getAllTopics);
 app.get("/api", getAllEndpoints);
 app.get("/api/articles/:article_id", getArticleById);
 app.get("/api/articles/:article_id/comments", getCommentsById )
 app.get("/api/articles", getAllArticles )
+app.post("/api/articles/:article_id/comments", postComments)
 
-// Error Handling
-app.use((err, req, res, next) => {
- if (err.status) {
-      res.status(err.status).send({ msg: err.msg });
-    } 
-});
+app.use(handlePsqlErrors)
+app.use(handleErrors)
+
+
 
 app.all("*", (req, res) => {
     res.status(404).send({ msg: "Not found" });

@@ -67,7 +67,7 @@ exports.selectCommentsById = (articleId) => {
 	}
 
 	return db
-		.query(`SELECT * FROM articles WHERE article_id = $1`,[articleId])
+		.query(`SELECT * FROM articles WHERE article_id = $1`, [articleId])
 		.then((result) => {
 			if (result.rows.length === 0) {
 				return Promise.reject({ status: 404, msg: "Not Found" });
@@ -76,8 +76,37 @@ exports.selectCommentsById = (articleId) => {
 			return db.query(
 				`SELECT * FROM COMMENTS WHERE article_id = $1 ORDER BY created_at DESC`,
 				[articleId]
-			)
-		}).then((comments) => {
-			return comments.rows
+			);
 		})
+		.then((comments) => {
+			return comments.rows;
+		});
+};
+
+
+exports.insertComment = (newComment, article_id) => {
+
+    const { username, body } = newComment;
+
+
+    return db
+        .query(`SELECT * FROM articles WHERE article_id = $1`, [article_id])
+        .then((articles) => {
+            if (articles.rows.length === 0) {
+                return Promise.reject({ status: 404, msg: "Not Found" });
+            }
+
+            if (body === "") {
+                return Promise.reject({ status: 400, msg: "Bad Request" });
+            }
+
+            return db.query(
+                `INSERT INTO comments (body, article_id, author) 
+                VALUES ($1, $2, $3) 
+                RETURNING *;`, [body, article_id, username]
+            );
+        })
+        .then((data) => {
+            return data.rows[0]
+        });
 };
