@@ -183,6 +183,28 @@ describe('POST /api/articles/:article_id/comments', () => {
 			expect(body).toHaveProperty('created_at')
 		})
 	});
+
+	test('should return a status code of 201 and a new comment posted to the database, ignoring any unnecessary properties', () => {
+		const newComment = {
+			username: 'icellusedkars',
+			body: 'Great article on how to build endpoints!',
+			age: 'Not Applicable'
+		}		
+		
+		return request(app)
+		.post('/api/articles/6/comments')
+		.send(newComment)
+		.expect(201)
+		.then(({ body }) => {
+			expect(body.body).toBe('Great article on how to build endpoints!')
+			expect(body.comment_id).toBe(19)
+			expect(body.article_id).toBe(6)
+			expect(body.author).toBe('icellusedkars')
+			expect(body.votes).toBe(0)
+			expect(body).toHaveProperty('created_at')
+			expect(body).not.toHaveProperty('age')
+		})
+	});
 	
 	test('should return a status code of 400 when user leaves a blank comment', () => {
 		const newComment = {
@@ -246,7 +268,4 @@ describe('POST /api/articles/:article_id/comments', () => {
 	});
 
 
-	test('should return a status code of 201 ', () => {
-		
-	});
 });
