@@ -155,3 +155,10 @@ exports.deleteComment = (comment_id) => {
 		return response.rows
 	})
 }
+
+exports.selectAllUsers = () => {
+	return db.query(`SELECT * FROM users`)
+	.then((usersData) => {
+		return usersData.rows
+	})
+}
