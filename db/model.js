@@ -83,7 +83,6 @@ exports.selectCommentsById = (articleId) => {
 		});
 };
 
-
 exports.insertComment = (newComment, article_id) => {
 
     const { username, body } = newComment;
@@ -109,4 +108,35 @@ exports.insertComment = (newComment, article_id) => {
         .then((data) => {
             return data.rows[0]
         });
+};
+
+exports.updateArticleVote = (article_id, inc_votes) => {
+
+    if (isNaN(Number(inc_votes))) {
+        return Promise.reject({ status: 400, msg: "Bad Request" });
+    }
+    if (inc_votes > 0) {
+        return db.query(
+            `UPDATE articles SET votes = votes + $1 WHERE article_id = $2 RETURNING *`, [inc_votes, article_id]
+        )
+        .then((res) => {
+            if (!res.rows.length) {
+                return Promise.reject({ status: 404, msg: "Not Found" });
+            }
+
+            return res.rows[0];
+        });
+    }
+	
+	else {
+		return db.query(
+            `UPDATE articles SET votes = votes + $1 WHERE article_id = $2 RETURNING *`, [inc_votes, article_id]
+        ).then((res) => {
+            if (!res.rows.length) {
+                return Promise.reject({ status: 404, msg: "Not Found" });
+            }
+
+            return res.rows[0];
+        });
+	}
 };

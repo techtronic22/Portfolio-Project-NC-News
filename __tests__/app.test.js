@@ -269,3 +269,95 @@ describe('POST /api/articles/:article_id/comments', () => {
 
 
 });
+
+describe('PATCH /api/articles/:article_id', () => {
+	test('should return status code 200 and update article votes to specified amount (incremented) ', () => {
+		const votesBody = { inc_votes : 1 }
+		return request(app)
+		.patch('/api/articles/6')
+		.send(votesBody)
+		.expect(200)
+		.then(({body}) => {
+			expect(body).toHaveProperty('author')
+			expect(body).toHaveProperty('title')
+			expect(body).toHaveProperty('article_id')
+			expect(body).toHaveProperty('body')
+			expect(body).toHaveProperty('topic')
+			expect(body).toHaveProperty('created_at')
+			expect(body).toHaveProperty('votes')
+			expect(body.votes).toEqual(1)
+			expect(body).toHaveProperty('article_img_url')
+		})
+	});
+	
+	test('should return status code 200 and update article votes to specified amount (decremented) ', () => {
+		const votesBody = { inc_votes : -1 }
+		return request(app)
+		.patch('/api/articles/6')
+		.send(votesBody)
+		.expect(200)
+		.then(({body}) => {
+			expect(body).toHaveProperty('author')
+			expect(body).toHaveProperty('title')
+			expect(body).toHaveProperty('article_id')
+			expect(body).toHaveProperty('body')
+			expect(body).toHaveProperty('topic')
+			expect(body).toHaveProperty('created_at')
+			expect(body).toHaveProperty('votes')
+			expect(body.votes).toEqual(-1)
+			expect(body).toHaveProperty('article_img_url')
+		})
+	});
+	
+		test('should return status code 200 and update article votes to specified amount (incremented) ', () => {
+		const votesBody = { inc_votes : 1 }
+		return request(app)
+		.patch('/api/articles/6')
+		.send(votesBody)
+		.expect(200)
+		.then(({body}) => {
+			expect(body).toHaveProperty('author')
+			expect(body).toHaveProperty('title')
+			expect(body).toHaveProperty('article_id')
+			expect(body).toHaveProperty('body')
+			expect(body).toHaveProperty('topic')
+			expect(body).toHaveProperty('created_at')
+			expect(body).toHaveProperty('votes')
+			expect(body.votes).toEqual(1)
+			expect(body).toHaveProperty('article_img_url')
+		})
+	});
+	
+	test('should return status code 400 when the vote value is not a number', () => {
+		const votesBody = { inc_votes : 'abc' }
+		return request(app)
+		.patch('/api/articles/6')
+		.send(votesBody)
+		.expect(400)
+		.then(({body}) => {
+			expect(body.msg).toBe('Bad Request')
+		})
+	});
+
+	test('should return status code 404 for an article_id that doesn"t exist', () => {
+		const votesBody = { inc_votes : 5 }
+		return request(app)
+		.patch('/api/articles/99')
+		.send(votesBody)
+		.expect(404)
+		.then(({body}) => {
+			expect(body.msg).toBe('Not Found')
+		})
+	});
+
+	test('should return status code 400 for an invalid article_id', () => {
+		const votesBody = { inc_votes : 3 }
+		return request(app)
+		.patch('/api/articles/rubbish')
+		.send(votesBody)
+		.expect(400)
+		.then(({body}) => {
+			expect(body.msg).toBe('Bad Request')
+		})
+	});
+});
