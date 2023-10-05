@@ -3,8 +3,10 @@ const {
 	selectAllArticles,
 	selectArticleById,
 	selectCommentsById,
-	insertComment
+	insertComment,
+	updateArticleVote
 } = require("./model");
+
 const fs = require("fs/promises");
 
 exports.getAllTopics = (req, res, next) => {
@@ -69,3 +71,14 @@ exports.postComments = (req, res, next) => {
 		});
 };
 
+exports.patchArticleById = (req, res, next) => {
+	const { article_id } = req.params;
+	const { inc_votes } = req.body;
+	updateArticleVote(article_id, inc_votes)
+		.then((result) => {
+			res.status(200).send(result);
+		})
+		.catch((err) => {
+			next(err);
+		});
+};

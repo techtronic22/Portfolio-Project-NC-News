@@ -5,8 +5,11 @@ const {
   getAllArticles,
 	getArticleById,
   getCommentsById,
-  postComments
+  postComments,
+  patchArticleById
 } = require("./controller");
+
+
 const { handlePsqlErrors, handleErrors } = require("./error-handler");
 
 const app = express();
@@ -18,6 +21,7 @@ app.get("/api/articles/:article_id", getArticleById);
 app.get("/api/articles/:article_id/comments", getCommentsById )
 app.get("/api/articles", getAllArticles )
 app.post("/api/articles/:article_id/comments", postComments)
+app.patch("/api/articles/:article_id", patchArticleById)
 
 app.use(handlePsqlErrors)
 app.use(handleErrors)
