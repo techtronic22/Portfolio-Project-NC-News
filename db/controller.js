@@ -4,9 +4,9 @@ const {
 	selectArticleById,
 	selectCommentsById,
 	insertComment,
-	updateArticleVote
+	updateArticleVote,
+	deleteComment
 } = require("./model");
-
 const fs = require("fs/promises");
 
 exports.getAllTopics = (req, res, next) => {
@@ -64,7 +64,7 @@ exports.postComments = (req, res, next) => {
 	const { article_id } = req.params;
 	insertComment(newComment, article_id)
 		.then((result) => {
-			res.status(201).send(result);
+			res.status(201).send(result );
 		})
 		.catch((err) => {
 			next(err);
@@ -82,3 +82,15 @@ exports.patchArticleById = (req, res, next) => {
 			next(err);
 		});
 };
+
+exports.removeComment = (req, res, next) => {
+	const {comment_id} = req.params
+	deleteComment(comment_id)
+	.then((response) => {
+		res.status(204).send({response})
+	})
+	.catch((err) => {
+		console.log(err)
+		next(err)
+	})
+}
