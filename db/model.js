@@ -85,11 +85,9 @@ exports.selectCommentsById = (articleId) => {
 
 
 exports.insertComment = (newComment, article_id) => {
-	if (!Number(article_id)) {
-		return Promise.reject({ status: 400, msg: "Bad Request" });
-	}
 
     const { username, body } = newComment;
+
 
     return db
         .query(`SELECT * FROM articles WHERE article_id = $1`, [article_id])

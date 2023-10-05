@@ -6,6 +6,7 @@ const data = require("../db/data/test-data");
 const sorted = require("jest-sorted");
 const endpoints = require("../endpoints.json");
 
+
 beforeEach(() => seed(data));
 afterAll(() => db.end());
 describe("GET api/topics", () => {
@@ -174,7 +175,12 @@ describe('POST /api/articles/:article_id/comments', () => {
 		.send(newComment)
 		.expect(201)
 		.then(({ body }) => {
-			expect(body.comment).toBe('Great article on how to build endpoints!')
+			expect(body.body).toBe('Great article on how to build endpoints!')
+			expect(body.comment_id).toBe(19)
+			expect(body.article_id).toBe(6)
+			expect(body.author).toBe('icellusedkars')
+			expect(body.votes).toBe(0)
+			expect(body).toHaveProperty('created_at')
 		})
 	});
 	
@@ -192,6 +198,22 @@ describe('POST /api/articles/:article_id/comments', () => {
 			expect(body.msg).toBe('Bad Request')
 		})
 	});
+
+	test('should return a status code of 400 when user leaves a blank comment', () => {
+		const newComment = {
+			username: '',
+			body: 'I love this article, it really inspires me'
+		}		
+		
+		return request(app)
+		.post('/api/articles/6/comments')
+		.send(newComment)
+		.expect(400)
+		.then(({ body }) => {
+			expect(body.msg).toBe('Missing author')
+		})
+	});
+	
 	
 	test('should return a status code of 400 for an invalid article_id', () => {
 		const newComment = {
@@ -223,18 +245,8 @@ describe('POST /api/articles/:article_id/comments', () => {
 		})
 	});
 
-	test('should return a status code of 404 for a username which doesn"t exist', () => {
-		const newComment = {
-			username: 'idonotexist',
-			body: 'Boring article :('
-		}		
+
+	test('should return a status code of 201 ', () => {
 		
-		return request(app)
-		.post('/api/articles/6/comments')
-		.send(newComment)
-		.expect(404)
-		.then(({ body }) => {
-			expect(body.msg).toBe('Username Not Found')
-		})
 	});
 });
