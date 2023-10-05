@@ -90,7 +90,6 @@ exports.removeComment = (req, res, next) => {
 		res.status(204).send({response})
 	})
 	.catch((err) => {
-		console.log(err)
 		next(err)
 	})
 }
