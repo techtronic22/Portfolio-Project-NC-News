@@ -481,3 +481,24 @@ describe("GET /api/articles (queries)", () => {
 
 });
 
+
+describe("GET /api/articles/:article_id (comment_count)", () => {
+	test("should return a status code of 200 with the requested article", () => {
+		return request(app)
+			.get("/api/articles/1")
+			.expect(200)
+			.then(({ body }) => {
+				expect(typeof body.article).toBe("object");
+				expect(body.article).toHaveProperty("article_id");
+				expect(body.article.article_id).toBe(1);
+				expect(body.article).toHaveProperty("comment_count")
+				expect(body.article).toHaveProperty("title");
+				expect(body.article).toHaveProperty("author");
+				expect(body.article).toHaveProperty("body");
+				expect(body.article).toHaveProperty("topic");
+				expect(body.article).toHaveProperty("created_at");
+				expect(body.article).toHaveProperty("votes");
+				expect(body.article).toHaveProperty("article_img_url");
+			});
+	});
+})
