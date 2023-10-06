@@ -5,7 +5,8 @@ const {
 	selectCommentsById,
 	insertComment,
 	updateArticleVote,
-	deleteComment
+	deleteComment,
+	selectAllUsers
 } = require("./model");
 const fs = require("fs/promises");
 
@@ -92,4 +93,15 @@ exports.removeComment = (req, res, next) => {
 	.catch((err) => {
 		next(err)
 	})
+}
+
+exports.getAllUsers = (req, res, next) => {
+	selectAllUsers()
+	.then((users) => {
+		res.status(200).send({ users })
+	})
+	.catch((err) => {
+		next(err)
+	})
+
 }
