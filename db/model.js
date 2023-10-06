@@ -16,18 +16,7 @@ exports.selectArticleById = (articleId) => {
 		return Promise.reject({ status: 400, msg: "Bad Request" });
 	}
 
-	const query = `
-	  SELECT 
-		author, 
-		title, 
-		article_id, 
-		body, 
-		topic, 
-		created_at, 
-		votes, 
-		article_img_url
-	  FROM articles
-	  WHERE article_id = $1`;
+	const query = `SELECT articles.author, title, articles.article_id, articles.body, topic, articles.created_at, articles.votes, article_img_url, COUNT(comment_id)::INT as comment_count FROM articles LEFT JOIN comments ON articles.article_id = comments.article_id WHERE articles.article_id = $1 GROUP BY articles.article_id`;
 
 	return db.query(query, [articleId]).then((result) => {
 		if (result.rows.length === 0) {
@@ -55,8 +44,6 @@ exports.selectAllArticles = (sort_by, order, topic) => {
 	} else if (topic !== undefined) {
 		const queryTopic = `WHERE topic = $1`;
 		return db.query(query + queryTopic, [topic]).then((articles) => {
-			if (!articles.rows.length)
-				return Promise.reject({ status: 404, msg: "Not Found" });
 			return articles.rows;
 		});
 	}

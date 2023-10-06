@@ -55,6 +55,7 @@ describe("GET /api/articles/:article_id", () => {
 				expect(typeof body.article).toBe("object");
 				expect(body.article).toHaveProperty("article_id");
 				expect(body.article.article_id).toBe(1);
+				expect(body.article).toHaveProperty("comment_count")
 				expect(body.article).toHaveProperty("title");
 				expect(body.article).toHaveProperty("author");
 				expect(body.article).toHaveProperty("body");
@@ -458,14 +459,6 @@ describe("GET /api/articles (queries)", () => {
 			});
 	});
 
-	test("should return a status code 404 for an non existent topic", () => {
-		return request(app)
-			.get("/api/articles?topic=tomandjerry")
-			.expect(404)
-			.then(({ body }) => {
-				expect(body.msg).toBe("Not Found");
-			});
-	});
 
 	test("should return a status code 400 for invalid sort by", () => {
 		return request(app)
@@ -475,4 +468,16 @@ describe("GET /api/articles (queries)", () => {
 				expect(body.msg).toBe("Bad Request");
 			});
 	});
+
+	test("should return a status code 200 & an empty array for a valid topic with no articles", () => {
+		return request(app)
+			.get("/api/articles?topic=paper")
+			.expect(200)
+			.then(({ body }) => {
+				const topicArticles = body.articles;
+				expect(topicArticles).toHaveLength(0);
+			});
+	});
+
 });
+
