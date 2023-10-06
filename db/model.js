@@ -153,6 +153,8 @@ exports.deleteComment = (comment_id) => {
 	})
 }
 
+
+
 exports.selectAllUsers = () => {
 	return db.query(`SELECT * FROM users`)
 	.then((usersData) => {
