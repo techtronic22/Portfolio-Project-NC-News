@@ -9,10 +9,10 @@ const {
   patchArticleById,
   removeComment,
   getAllUsers
-} = require("./controller");
+} = require("./db/controller");
 
 
-const { handlePsqlErrors, handleErrors } = require("./error-handler");
+const { handlePsqlErrors, handleErrors } = require("./db/error-handler");
 
 const app = express();
 app.use(express.json());
