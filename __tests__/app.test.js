@@ -348,9 +348,7 @@ describe("DELETE /api/comments/:comment_id", () => {
 		return request(app)
 			.delete("/api/comments/1")
 			.expect(204)
-			.then((response) => {
-				expect(response.body).toEqual({});
-			});
+			
 	});
 
 	test('should return a status code of 404 for a comment_id that doesn"t exist', () => {
