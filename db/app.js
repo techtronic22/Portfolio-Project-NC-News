@@ -6,7 +6,8 @@ const {
 	getArticleById,
   getCommentsById,
   postComments,
-  patchArticleById
+  patchArticleById,
+  removeComment
 } = require("./controller");
 
 
@@ -22,6 +23,7 @@ app.get("/api/articles/:article_id/comments", getCommentsById )
 app.get("/api/articles", getAllArticles )
 app.post("/api/articles/:article_id/comments", postComments)
 app.patch("/api/articles/:article_id", patchArticleById)
+app.delete("/api/comments/:comment_id", removeComment)
 
 app.use(handlePsqlErrors)
 app.use(handleErrors)
