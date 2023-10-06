@@ -6,7 +6,6 @@ const data = require("../db/data/test-data");
 const sorted = require("jest-sorted");
 const endpoints = require("../endpoints.json");
 
-
 beforeEach(() => seed(data));
 afterAll(() => db.end());
 describe("GET api/topics", () => {
@@ -56,6 +55,7 @@ describe("GET /api/articles/:article_id", () => {
 				expect(typeof body.article).toBe("object");
 				expect(body.article).toHaveProperty("article_id");
 				expect(body.article.article_id).toBe(1);
+				expect(body.article).toHaveProperty("comment_count")
 				expect(body.article).toHaveProperty("title");
 				expect(body.article).toHaveProperty("author");
 				expect(body.article).toHaveProperty("body");
@@ -122,7 +122,10 @@ describe("GET /api/articles/:article_id/comments", () => {
 			.then(({ body }) => {
 				expect(body.comments).toHaveLength(11);
 				expect(Array.isArray(body.comments)).toBe(true);
-				expect(body.comments).toBeSorted({ descending: true, key: 'created_at' });
+				expect(body.comments).toBeSorted({
+					descending: true,
+					key: "created_at",
+				});
 				body.comments.forEach((comment) => {
 					expect(comment).toHaveProperty("comment_id");
 					expect(comment).toHaveProperty("votes");
@@ -132,223 +135,216 @@ describe("GET /api/articles/:article_id/comments", () => {
 					expect(comment).toHaveProperty("article_id", 1);
 				});
 			});
-	})
+	});
 
-	test('should return a status code of 404 Not Found for an article_id that does not exist', () => {
+	test("should return a status code of 404 Not Found for an article_id that does not exist", () => {
 		return request(app)
-		.get("/api/articles/99/comments")
-		.expect(404)
-		.then(({ body }) => {
-			expect(body.msg).toBe('Not Found')
-		}) 		
+			.get("/api/articles/99/comments")
+			.expect(404)
+			.then(({ body }) => {
+				expect(body.msg).toBe("Not Found");
+			});
 	});
 
 	test('should return a status code of 200 with an empty array for an article_id that exists but doesn"t have a comment', () => {
 		return request(app)
-		.get("/api/articles/10/comments")
-		.expect(200)
-		.then(({ body }) => {
-			expect(body.comments).toEqual([])
-		}) 		
+			.get("/api/articles/10/comments")
+			.expect(200)
+			.then(({ body }) => {
+				expect(body.comments).toEqual([]);
+			});
 	});
 
-	test('should return a status code of 400 Bad Request for an invalid article_id', () => {
+	test("should return a status code of 400 Bad Request for an invalid article_id", () => {
 		return request(app)
-		.get("/api/articles/noarticle/comments")
-		.expect(400)
-		.then(({ body }) => {
-			expect(body.msg).toBe('Bad Request')
-		}) 		
+			.get("/api/articles/noarticle/comments")
+			.expect(400)
+			.then(({ body }) => {
+				expect(body.msg).toBe("Bad Request");
+			});
+	});
+});
+
+describe("POST /api/articles/:article_id/comments", () => {
+	test("should return a status code of 201 and a new comment posted to the database", () => {
+		const newComment = {
+			username: "icellusedkars",
+			body: "Great article on how to build endpoints!",
+		};
+
+		return request(app)
+			.post("/api/articles/6/comments")
+			.send(newComment)
+			.expect(201)
+			.then(({ body }) => {
+				expect(body.body).toBe("Great article on how to build endpoints!");
+				expect(body.comment_id).toBe(19);
+				expect(body.article_id).toBe(6);
+				expect(body.author).toBe("icellusedkars");
+				expect(body.votes).toBe(0);
+				expect(body).toHaveProperty("created_at");
+			});
 	});
 
-})
+	test("should return a status code of 201 and a new comment posted to the database, ignoring any unnecessary properties", () => {
+		const newComment = {
+			username: "icellusedkars",
+			body: "Great article on how to build endpoints!",
+			age: "Not Applicable",
+		};
 
-describe('POST /api/articles/:article_id/comments', () => {
-	test('should return a status code of 201 and a new comment posted to the database', () => {
-		const newComment = {
-			username: 'icellusedkars',
-			body: 'Great article on how to build endpoints!'
-		}		
-		
 		return request(app)
-		.post('/api/articles/6/comments')
-		.send(newComment)
-		.expect(201)
-		.then(({ body }) => {
-			expect(body.body).toBe('Great article on how to build endpoints!')
-			expect(body.comment_id).toBe(19)
-			expect(body.article_id).toBe(6)
-			expect(body.author).toBe('icellusedkars')
-			expect(body.votes).toBe(0)
-			expect(body).toHaveProperty('created_at')
-		})
-	});
-
-	test('should return a status code of 201 and a new comment posted to the database, ignoring any unnecessary properties', () => {
-		const newComment = {
-			username: 'icellusedkars',
-			body: 'Great article on how to build endpoints!',
-			age: 'Not Applicable'
-		}		
-		
-		return request(app)
-		.post('/api/articles/6/comments')
-		.send(newComment)
-		.expect(201)
-		.then(({ body }) => {
-			expect(body.body).toBe('Great article on how to build endpoints!')
-			expect(body.comment_id).toBe(19)
-			expect(body.article_id).toBe(6)
-			expect(body.author).toBe('icellusedkars')
-			expect(body.votes).toBe(0)
-			expect(body).toHaveProperty('created_at')
-			expect(body).not.toHaveProperty('age')
-		})
-	});
-	
-	test('should return a status code of 400 when user leaves a blank comment', () => {
-		const newComment = {
-			username: 'icellusedkars',
-			body: ''
-		}		
-		
-		return request(app)
-		.post('/api/articles/6/comments')
-		.send(newComment)
-		.expect(400)
-		.then(({ body }) => {
-			expect(body.msg).toBe('Bad Request')
-		})
+			.post("/api/articles/6/comments")
+			.send(newComment)
+			.expect(201)
+			.then(({ body }) => {
+				expect(body.body).toBe("Great article on how to build endpoints!");
+				expect(body.comment_id).toBe(19);
+				expect(body.article_id).toBe(6);
+				expect(body.author).toBe("icellusedkars");
+				expect(body.votes).toBe(0);
+				expect(body).toHaveProperty("created_at");
+				expect(body).not.toHaveProperty("age");
+			});
 	});
 
-	test('should return a status code of 400 when user leaves a blank comment', () => {
+	test("should return a status code of 400 when user leaves a blank comment", () => {
 		const newComment = {
-			username: '',
-			body: 'I love this article, it really inspires me'
-		}		
-		
+			username: "icellusedkars",
+			body: "",
+		};
+
 		return request(app)
-		.post('/api/articles/6/comments')
-		.send(newComment)
-		.expect(400)
-		.then(({ body }) => {
-			expect(body.msg).toBe('Missing author')
-		})
+			.post("/api/articles/6/comments")
+			.send(newComment)
+			.expect(400)
+			.then(({ body }) => {
+				expect(body.msg).toBe("Bad Request");
+			});
 	});
-	
-	
-	test('should return a status code of 400 for an invalid article_id', () => {
+
+	test("should return a status code of 400 when user leaves a blank comment", () => {
 		const newComment = {
-			username: 'icellusedkars',
-			body: 'Very useful article !'
-		}		
-		
+			username: "",
+			body: "I love this article, it really inspires me",
+		};
+
 		return request(app)
-		.post('/api/articles/rubbish/comments')
-		.send(newComment)
-		.expect(400)
-		.then(({ body }) => {
-			expect(body.msg).toBe('Bad Request')
-		})
+			.post("/api/articles/6/comments")
+			.send(newComment)
+			.expect(400)
+			.then(({ body }) => {
+				expect(body.msg).toBe("Missing author");
+			});
+	});
+
+	test("should return a status code of 400 for an invalid article_id", () => {
+		const newComment = {
+			username: "icellusedkars",
+			body: "Very useful article !",
+		};
+
+		return request(app)
+			.post("/api/articles/rubbish/comments")
+			.send(newComment)
+			.expect(400)
+			.then(({ body }) => {
+				expect(body.msg).toBe("Bad Request");
+			});
 	});
 
 	test('should return a status code of 404 for an article_id which doesn"t exist', () => {
 		const newComment = {
-			username: 'icellusedkars',
-			body: 'Very useful article !'
-		}		
-		
+			username: "icellusedkars",
+			body: "Very useful article !",
+		};
+
 		return request(app)
-		.post('/api/articles/99/comments')
-		.send(newComment)
-		.expect(404)
-		.then(({ body }) => {
-			expect(body.msg).toBe('Not Found')
-		})
+			.post("/api/articles/99/comments")
+			.send(newComment)
+			.expect(404)
+			.then(({ body }) => {
+				expect(body.msg).toBe("Not Found");
+			});
 	});
-
-
 });
 
-describe('PATCH /api/articles/:article_id', () => {
-	test('should return status code 200 and update article votes to specified amount (incremented) ', () => {
-		const votesBody = { inc_votes : 1 }
+describe("PATCH /api/articles/:article_id", () => {
+	test("should return status code 200 and update article votes to specified amount (incremented) ", () => {
+		const votesBody = { inc_votes: 1 };
 		return request(app)
-		.patch('/api/articles/6')
-		.send(votesBody)
-		.expect(200)
-		.then(({body}) => {
-			expect(body).toHaveProperty('author')
-			expect(body).toHaveProperty('title')
-			expect(body).toHaveProperty('article_id')
-			expect(body).toHaveProperty('body')
-			expect(body).toHaveProperty('topic')
-			expect(body).toHaveProperty('created_at')
-			expect(body).toHaveProperty('votes')
-			expect(body.votes).toEqual(1)
-			expect(body).toHaveProperty('article_img_url')
-		})
+			.patch("/api/articles/6")
+			.send(votesBody)
+			.expect(200)
+			.then(({ body }) => {
+				expect(body).toHaveProperty("author");
+				expect(body).toHaveProperty("title");
+				expect(body).toHaveProperty("article_id");
+				expect(body).toHaveProperty("body");
+				expect(body).toHaveProperty("topic");
+				expect(body).toHaveProperty("created_at");
+				expect(body).toHaveProperty("votes");
+				expect(body.votes).toEqual(1);
+				expect(body).toHaveProperty("article_img_url");
+			});
 	});
-	
-	test('should return status code 200 and update article votes to specified amount (decremented) ', () => {
-		const votesBody = { inc_votes : -1 }
+
+	test("should return status code 200 and update article votes to specified amount (decremented) ", () => {
+		const votesBody = { inc_votes: -1 };
 		return request(app)
-		.patch('/api/articles/6')
-		.send(votesBody)
-		.expect(200)
-		.then(({body}) => {
-			expect(body).toHaveProperty('author')
-			expect(body).toHaveProperty('title')
-			expect(body).toHaveProperty('article_id')
-			expect(body).toHaveProperty('body')
-			expect(body).toHaveProperty('topic')
-			expect(body).toHaveProperty('created_at')
-			expect(body).toHaveProperty('votes')
-			expect(body.votes).toEqual(-1)
-			expect(body).toHaveProperty('article_img_url')
-		})
+			.patch("/api/articles/6")
+			.send(votesBody)
+			.expect(200)
+			.then(({ body }) => {
+				expect(body).toHaveProperty("author");
+				expect(body).toHaveProperty("title");
+				expect(body).toHaveProperty("article_id");
+				expect(body).toHaveProperty("body");
+				expect(body).toHaveProperty("topic");
+				expect(body).toHaveProperty("created_at");
+				expect(body).toHaveProperty("votes");
+				expect(body.votes).toEqual(-1);
+				expect(body).toHaveProperty("article_img_url");
+			});
 	});
-	
-	test('should return status code 400 when the vote value is not a number', () => {
-		const votesBody = { inc_votes : 'abc' }
+
+	test("should return status code 400 when the vote value is not a number", () => {
+		const votesBody = { inc_votes: "abc" };
 		return request(app)
-		.patch('/api/articles/6')
-		.send(votesBody)
-		.expect(400)
-		.then(({body}) => {
-			expect(body.msg).toBe('Bad Request')
-		})
+			.patch("/api/articles/6")
+			.send(votesBody)
+			.expect(400)
+			.then(({ body }) => {
+				expect(body.msg).toBe("Bad Request");
+			});
 	});
 
 	test('should return status code 404 for an article_id that doesn"t exist', () => {
-		const votesBody = { inc_votes : 5 }
+		const votesBody = { inc_votes: 5 };
 		return request(app)
-		.patch('/api/articles/99')
-		.send(votesBody)
-		.expect(404)
-		.then(({body}) => {
-			expect(body.msg).toBe('Not Found')
-		})
+			.patch("/api/articles/99")
+			.send(votesBody)
+			.expect(404)
+			.then(({ body }) => {
+				expect(body.msg).toBe("Not Found");
+			});
 	});
 
-	test('should return status code 400 for an invalid article_id', () => {
-		const votesBody = { inc_votes : 3 }
+	test("should return status code 400 for an invalid article_id", () => {
+		const votesBody = { inc_votes: 3 };
 		return request(app)
-		.patch('/api/articles/rubbish')
-		.send(votesBody)
-		.expect(400)
-		.then(({body}) => {
-			expect(body.msg).toBe('Bad Request')
-		})
+			.patch("/api/articles/rubbish")
+			.send(votesBody)
+			.expect(400)
+			.then(({ body }) => {
+				expect(body.msg).toBe("Bad Request");
+			});
 	});
 });
 
 describe("DELETE /api/comments/:comment_id", () => {
 	test("should return a status code of 204 & delete a comment by comment_id", () => {
-		return request(app)
-			.delete("/api/comments/1")
-			.expect(204)
-			
+		return request(app).delete("/api/comments/1").expect(204);
 	});
 
 	test('should return a status code of 404 for a comment_id that doesn"t exist', () => {
@@ -385,5 +381,103 @@ describe("GET /api/users", () => {
 				});
 			});
 	});
+});
+
+describe("GET /api/articles (queries)", () => {
+	test("should return a status code 200 & articles based on topic query specified ", () => {
+		return request(app)
+			.get("/api/articles?topic=mitch")
+			.expect(200)
+			.then(({ body }) => {
+				const topicArticles = body.articles;
+				expect(topicArticles).toHaveLength(12);
+				topicArticles.forEach((article) => {
+					expect(article.topic).toBe("mitch");
+				});
+			});
+	});
+
+	test("should return a status code 200 & return articles sorted by a specified column asc", () => {
+		return request(app)
+			.get("/api/articles?sort_by=author&order=asc")
+			.expect(200)
+			.then(({ body }) => {
+				const authorArticles = body.articles;
+				expect(authorArticles).toHaveLength(13);
+				expect(authorArticles).toBeSorted({ key: "author"});
+			});
+	});
+
+	test("should return a status code 200 & return articles sorted by a specified column desc", () => {
+		return request(app)
+			.get("/api/articles?sort_by=author")
+			.expect(200)
+			.then(({ body }) => {
+				const authorArticles = body.articles;
+				expect(authorArticles).toHaveLength(13);
+				expect(authorArticles).toBeSorted({ key: "author" });
+			});
+	});
+
+	test("should return a status code 200 & return articles sorted by date in ascending order", () => {
+		return request(app)
+			.get("/api/articles?sort_by=created_at&order=asc")
+			.expect(200)
+			.then(({ body }) => {
+				const authorArticles = body.articles;
+				expect(authorArticles).toHaveLength(13);
+				expect(authorArticles).toBeSorted({ ascending: true });
+			});
+	});
+
+	test("should return a status code 200 & return articles sorted by date in descending order", () => {
+		return request(app)
+			.get("/api/articles?sort_by=created_at&order=desc")
+			.expect(200)
+			.then(({ body }) => {
+				const authorArticles = body.articles;
+				expect(authorArticles).toHaveLength(13);
+				expect(authorArticles).toBeSorted({ descending: true });
+			});
+	});
+
+	test("should return a status code 400 for an invalid topic", () => {
+		return request(app)
+			.get("/api/articles?topic=999")
+			.expect(400)
+			.then(({ body }) => {
+				expect(body.msg).toBe("Bad Request");
+			});
+	});
+
+	test("should return a status code 400 for an invalid order", () => {
+		return request(app)
+			.get("/api/articles?order=down")
+			.expect(400)
+			.then(({ body }) => {
+				expect(body.msg).toBe("Bad Request");
+			});
+	});
+
+
+	test("should return a status code 400 for invalid sort by", () => {
+		return request(app)
+			.get("/api/articles?sort_by=biscuit")
+			.expect(400)
+			.then(({ body }) => {
+				expect(body.msg).toBe("Bad Request");
+			});
+	});
+
+	test("should return a status code 200 & an empty array for a valid topic with no articles", () => {
+		return request(app)
+			.get("/api/articles?topic=paper")
+			.expect(200)
+			.then(({ body }) => {
+				const topicArticles = body.articles;
+				expect(topicArticles).toHaveLength(0);
+			});
+	});
+
 });
 
