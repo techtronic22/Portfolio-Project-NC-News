@@ -1,4 +1,6 @@
 const express = require("express");
+const cors = require('cors');
+
 const {
 	getAllTopics,
 	getAllEndpoints,
@@ -16,6 +18,8 @@ const { handlePsqlErrors, handleErrors } = require("./db/error-handler");
 
 const app = express();
 app.use(express.json());
+app.use(cors());
+
 
 app.get("/api/topics", getAllTopics);
 app.get("/api", getAllEndpoints);
